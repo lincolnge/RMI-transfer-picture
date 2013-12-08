@@ -1,40 +1,94 @@
 import java.awt.AWTException;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.*;
 import java.rmi.*;
 import java.net.*;
 
 import javax.imageio.ImageIO;
-public class messageClient {
-  public static void main(String args[]) {
-    (new Thread(new Runner())).start();
-  }
-}
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+public class messageClient  extends JFrame implements ActionListener{
+  JPanel panel=new JPanel(new BorderLayout());
+  JPanel panel_iner=new JPanel(new BorderLayout());
 
-class Runner implements Runnable {
-  public void run () {
+  String urlString="";
+  JLabel label=new JLabel(new ImageIcon(urlString));
+  TextField tf = new TextField(); 
+  // Create a button 
+  JButton enterButton = new JButton("Click the button.");
+  JButton endButton = new JButton("Click the end program.");
+  
+  public static void main(String args[]) {
+    new messageClient();
+  }
+  
+  public messageClient() {
+    super();
+
+    // Have the button add this window as an event listener
+    enterButton.addActionListener(this);
+    endButton.addActionListener(this);
+    // Set the button's action command 
+    //   (used in the event the button will generate)
+    enterButton.setActionCommand("show");
+    endButton.setActionCommand("end");
+    
+    panel.add(label,BorderLayout.CENTER);
+    panel.add(panel_iner,BorderLayout.SOUTH);
+    panel_iner.setLayout(new GridLayout(1,3));
+    panel_iner.add(tf);
+    panel_iner.add(enterButton);
+    panel_iner.add(endButton);
+
+
+    this.getContentPane().setLayout(new BorderLayout());
+    this.getContentPane().add(panel, BorderLayout.CENTER);
+    
+    this.setSize(1440, 900);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setTitle("Show Picture");
+    this.setVisible(true);
+  }
+
+  public void actionPerformed(ActionEvent evt) {
+    // Get the action command from the event
+    String actionCommand = evt.getActionCommand();
+    if (actionCommand.equals("end")) {
+      // If we click the button, exit the program
+      System.exit(0);
+    }
+    
+    panel.remove(label);
+
     System.out.println("mymessageClient go.");
     BufferedReader br = new BufferedReader (
       new InputStreamReader(System.in));
     String str = null;
-//    try {
-//      str = br.readLine();
-//    } catch (IOException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
+
     byte[] lt = null;
 
     try {
-      Object o = Naming.lookup("connect");
+       Object o = Naming.lookup(tf.getText());
+      // Object o = Naming.lookup("rmi://127.0.0.1/connect");
+      // Object o = Naming.lookup("rmi://192.168.29.202/connect");
+      // Object o = Naming.lookup("rmi://172.20.10.7:1099/connect");
+
       receiveMessageInterface ts = (receiveMessageInterface) o;
-      // ts.receiveMessage(args[0]);
       
       lt = ts.receiveMessage(str);
       ByteArrayInputStream bin = new ByteArrayInputStream(lt);  
       BufferedImage image = ImageIO.read(bin);
       
+      label = new JLabel(new ImageIcon(image));     
+
       File file = new File("image.jpg");
       ImageIO.write(image, "jpg", file);
       
@@ -50,6 +104,15 @@ class Runner implements Runnable {
     } catch (IOException e) {
       // TODO Auto-generated catch block
       System.err.println("\nIOException threw exception " + e);
-    } 
+    }
+    
+    // The only event we are interested in as that from 
+    if (actionCommand.equals("show")) {
+      panel.add(label, BorderLayout.CENTER);
+      this.getContentPane().add(panel, BorderLayout.CENTER);
+      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      this.setTitle("Show Picture");
+      this.setVisible(true);
+    }
   }
 }
