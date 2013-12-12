@@ -23,12 +23,12 @@ public class messageServer extends UnicastRemoteObject implements receiveMessage
 //        new Rectangle(100,100,100,100));
     BufferedImage screencapture = new Robot().createScreenCapture(
         new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()) );
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
     
     // save in local
 //    File file = new File("screencapture.jpg");
 //    ImageIO.write(screencapture, "jpg", file);
     
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     ImageIO.write(screencapture, "jpg", out);
     byte[] b = out.toByteArray();  
     return b;
